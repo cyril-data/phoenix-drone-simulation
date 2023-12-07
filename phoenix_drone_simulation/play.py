@@ -12,6 +12,8 @@ import numpy as np
 # local imports
 from phoenix_drone_simulation.utils import utils
 
+# Set RDMAV_FORK_SAFE environment variable
+os.environ['RDMAV_FORK_SAFE'] = '1'
 
 def play_after_training(actor_critic, env, noise=False):
     if not noise:
