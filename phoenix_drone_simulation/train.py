@@ -23,6 +23,9 @@ from phoenix_drone_simulation.algs.model import Model
 from phoenix_drone_simulation.utils.mpi_tools import mpi_fork, mpi_print, is_root_process
 
 
+# Set RDMAV_FORK_SAFE environment variable
+os.environ['RDMAV_FORK_SAFE'] = '1'
+
 def get_training_command_line_args(
         alg: Optional[str] = None,
         env: Optional[str] = None

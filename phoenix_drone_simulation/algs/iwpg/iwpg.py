@@ -256,12 +256,9 @@ class IWPGAlgorithm(core.OnPolicyGradientAlgorithm):
         return ((self.ac.v(obs) - ret) ** 2).mean()
 
     def learn(self, init_with_weight=None) -> tuple:
-        print("\t\t", "-"*40)
-        print("\t\t", "-"*40)
         if init_with_weight is not None : 
             self.ac = init_with_weight
 
-        print("\t\t pi get_weight", self.ac.pi.net[0].weight)
         # Main loop: collect experience in env and update/log each epoch
         for self.epoch in range(self.epochs):
             self.learn_one_epoch()
