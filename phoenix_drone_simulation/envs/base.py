@@ -360,6 +360,7 @@ class DroneBaseEnv(gym.Env, abc.ABC):
         array
             holding RBG image of environment if mode == 'rgb_array'
         """
+
         if self.render_mode == 'human':
             # close direct connection to physics server and
             # create new instance of physics with GUI visuals

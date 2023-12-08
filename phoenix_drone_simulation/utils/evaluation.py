@@ -69,6 +69,7 @@ class EnvironmentEvaluator(object):
 
         for i in range(num_local_evaluations):
             returns[i], ep_lengths[i], costs[i] = self.eval_once()
+
         # Gather returns from all processes
         # Note: only root process owns valid data...
         returns = list(mpi_tools.gather_and_stack(returns))
@@ -84,13 +85,15 @@ class EnvironmentEvaluator(object):
                   f'Mean EpLen: {np.mean(ep_lengths)} \t'
                   f'Mean Costs: {np.mean(costs)}')
 
+        print("file writen")
+
         self.ac.train()  # back to train mode
         return np.array(returns), np.array(ep_lengths), np.array(costs)
 
     def eval_once(self):
         assert not self.ac.training, 'Call actor_critic.eval() beforehand.'
         done = False
-        x = self.env.reset()
+        x, info = self.env.reset()
         ret = 0.
         costs = 0.
         episode_length = 0
@@ -102,6 +105,7 @@ class EnvironmentEvaluator(object):
             ret += r
             costs += info.get('cost', 0.)
             episode_length += 1
+            done = terminated or truncated
 
         return ret, episode_length, costs
 

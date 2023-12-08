@@ -46,16 +46,16 @@ def main():
     # 4) visualize trained PPO model
     env = gym.make(env_id, render_mode="human")
     while True:
-        obs = env.reset()
+        obs, info = env.reset()
         done = False
         while not done:
             obs = torch.as_tensor(obs, dtype=torch.float32)
             action, value, *_ = model.actor_critic(obs)
             obs, reward, terminated, truncated, info = env.step(action)
-
+            done = terminated or truncated
             time.sleep(1/60)
             if done:
-                obs = env.reset()
+                obs, info = env.reset()
 
 
 if __name__ == '__main__':

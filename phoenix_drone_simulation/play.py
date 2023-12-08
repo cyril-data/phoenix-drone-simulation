@@ -23,6 +23,9 @@ def play_after_training(actor_critic, env, noise=False):
     while True:
         done = False
         x, info = env.reset()
+        print("x", x)
+        print("info", info)
+        print("env", env)
         ret = 0.
         costs = 0.
         episode_length = 0

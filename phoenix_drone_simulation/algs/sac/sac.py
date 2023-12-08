@@ -393,7 +393,7 @@ class SoftActorCriticAlgorithm(core.OffPolicyGradientAlgorithm):
     def roll_out(self):
         r"""Rollout >>one<< episode and store to buffer."""
 
-        o, ep_ret, ep_len = self.env.reset(), 0., 0
+        o, info, ep_ret, ep_len = self.env.reset(), 0., 0
         local_start_steps = int(self.start_steps / mpi.num_procs())
 
         for t in range(self.local_batch_size):
@@ -429,7 +429,7 @@ class SoftActorCriticAlgorithm(core.OffPolicyGradientAlgorithm):
             if timeout or done:
                  # only save EpRet / EpLen if trajectory finished
                 self.logger.store(EpRet=ep_ret, EpLen=ep_len)
-                o, ep_ret, ep_len = self.env.reset(), 0., 0
+                o, info, ep_ret, ep_len = self.env.reset(), 0., 0
         if self.in_warm_up:
             # add zero values to prevent logging errors during warm-up
             self.logger.store(Q1Vals=0, Q2Vals=0, LossQ=0, LossPi=0, LogPi=0)

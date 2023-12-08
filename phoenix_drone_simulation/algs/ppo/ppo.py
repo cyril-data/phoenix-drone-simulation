@@ -57,7 +57,10 @@ def learn(
         env_id=env_id,
         **defaults
     )
-
-    ac, env = alg.learn()
-
+    
+    if "init_with_weight" in kwargs: 
+        if kwargs["init_with_weight"] is not None: 
+            ac, env = alg.learn(init_with_weight=kwargs["init_with_weight"])
+    else:
+        ac, env = alg.learn()
     return ac, env

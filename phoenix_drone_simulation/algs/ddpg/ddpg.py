@@ -386,7 +386,7 @@ class DeepDeterministicPolciyGradientAlgorithm(core.OffPolicyGradientAlgorithm):
     def roll_out(self):
         r"""Rollout >>one<< episode and store to buffer."""
 
-        o, ep_ret, ep_len = self.env.reset(), 0., 0
+        o, info , ep_ret, ep_len = self.env.reset(), 0., 0
 
         for t in range(self.local_batch_size):
             self.in_warm_up = True if len(self.buffer) < self.warmup_steps else False
@@ -421,7 +421,7 @@ class DeepDeterministicPolciyGradientAlgorithm(core.OffPolicyGradientAlgorithm):
             if timeout or done:
                  # only save EpRet / EpLen if trajectory finished
                 self.logger.store(EpRet=ep_ret, EpLen=ep_len)
-                o, ep_ret, ep_len = self.env.reset(), 0., 0
+                o, info, ep_ret, ep_len = self.env.reset(), 0., 0
         if self.in_warm_up:
             # add zero values to prevent logging errors during warm-up
             self.logger.store(QVals=0., LossQ=0.0, LossPi=0.0)

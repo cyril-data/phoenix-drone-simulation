@@ -61,6 +61,7 @@ class IWPGAlgorithm(core.OnPolicyGradientAlgorithm):
             save_freq: int = 10,
             seed: int = 0,
             video_freq: int = -1,  # set to positive integer for video recording
+            # ac: core.ActorCritic = None
             **kwargs  # use to log parameters from child classes
     ):
 
@@ -126,7 +127,6 @@ class IWPGAlgorithm(core.OnPolicyGradientAlgorithm):
         np.random.seed(seed)
         self.env.reset(seed=seed)
 
-        # === Setup actor-critic module
         self.ac = core.ActorCritic(
             actor_type=actor,
             observation_space=self.env.observation_space,
@@ -137,7 +137,6 @@ class IWPGAlgorithm(core.OnPolicyGradientAlgorithm):
             weight_initialization=weight_initialization,
             ac_kwargs=ac_kwargs
         )
-
         # === set up MPI specifics
         self._init_mpi()
 
@@ -256,7 +255,13 @@ class IWPGAlgorithm(core.OnPolicyGradientAlgorithm):
         r"""Set up function for computing value loss."""
         return ((self.ac.v(obs) - ret) ** 2).mean()
 
-    def learn(self) -> tuple:
+    def learn(self, init_with_weight=None) -> tuple:
+        print("\t\t", "-"*40)
+        print("\t\t", "-"*40)
+        if init_with_weight is not None : 
+            self.ac = init_with_weight
+
+        print("\t\t pi get_weight", self.ac.pi.net[0].weight)
         # Main loop: collect experience in env and update/log each epoch
         for self.epoch in range(self.epochs):
             self.learn_one_epoch()
@@ -280,6 +285,9 @@ class IWPGAlgorithm(core.OnPolicyGradientAlgorithm):
         # Check if all models own the same parameter values
         if self.epoch % self.check_freq == 0:
             self.check_distributed_parameters()
+
+
+
         # Save model to disk
         if is_last_epoch or self.epoch % self.save_freq == 0:
             self.logger.save_state(state_dict={}, itr=None)

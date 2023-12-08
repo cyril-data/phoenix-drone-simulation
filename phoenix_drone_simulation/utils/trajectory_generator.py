@@ -61,7 +61,7 @@ class TrajectoryGenerator:
         """
         TARGET_FPS = 100
         target_dt = 1.0 / TARGET_FPS
-        x = self.env.reset()
+        x, info = self.env.reset()
         ret = 0.
         costs = 0.
         episode_length = 0
@@ -80,6 +80,8 @@ class TrajectoryGenerator:
             delta = time.time() - ts
             if render and delta < target_dt:
                 time.sleep(target_dt-delta)  # sleep delta time
+            done = terminated or truncated
+        
         if render:
             print(f'Return: {ret}\t Length: {episode_length}\t Costs:{costs}')
         return ret, episode_length
@@ -102,7 +104,7 @@ class TrajectoryGenerator:
         t = 0
         X = []
         Y = []
-        obs = self.env.reset()
+        obs, info = self.env.reset()
         while t < N:
             x = self.obs_rms(torch.as_tensor(obs, dtype=torch.float32))
             X.append(x.numpy())
@@ -113,7 +115,7 @@ class TrajectoryGenerator:
             obs = y  # set old state (x_t) as new state (x_{t+1})
             t += 1
             if done:
-                obs = self.env.reset()
+                obs, info = self.env.reset()
         return np.array(X), np.array(Y)
 
     def load_file_from_disk(

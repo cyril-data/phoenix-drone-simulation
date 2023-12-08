@@ -175,7 +175,7 @@ def play_after_training(actor_critic, env, noise=False):
         actor_critic.eval()  # Set in evaluation mode before playing
     actions = []
     done = False
-    x = env.reset()
+    x, info  = env.reset()
     xs = [convert_quat_obs_to_rpy(x), ]
     drone_rpms = [env.unwrapped.drone.x, ]
     # while not done:

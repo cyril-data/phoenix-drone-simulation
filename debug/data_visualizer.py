@@ -37,7 +37,7 @@ def remove_battery_compensation(
 def create_sim_data(N, env, env_id, actions):
     # _print(f'read from env: {env.unwrapped.init_rpy_dot}')
     render = False
-    x = env.reset()
+    x, info  = env.reset()
     print(f'x: {x.shape}')
     # _print(f'read from drone: {env.unwrapped.drone.rpy_dot}')
     print(f'env.obs: {env.observation_space.shape[0]}')

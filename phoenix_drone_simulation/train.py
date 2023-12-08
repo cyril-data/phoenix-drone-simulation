@@ -11,7 +11,9 @@ import warnings
 import logging
 import os
 import getpass
+import torch
 from typing import Optional, Tuple
+
 
 # local imports
 import phoenix_drone_simulation  # import environments
@@ -53,7 +55,6 @@ def get_training_command_line_args(
         parser.add_argument(
             '--alg', type=str, required=True,
             help='Choose from: {iwpg, ppo, trpo, npg}')
-
     parser.add_argument(
         '--cores', '-c', type=int, default=physical_cores,
         help=f'Number of cores used for calculations.')
@@ -84,12 +85,15 @@ def get_training_command_line_args(
     parser.add_argument(
         '--search', action='store_true',
         help='If given search over learning rates.')
-
+    parser.add_argument('--ckpt', type=str, default=None,
+                        help='Choose from: {ppo, trpo}')
+    
     user_name = getpass.getuser()
     parser.add_argument(
         '--log-dir', type=str, default=os.path.join('/var/tmp/', user_name),
         help='Define a custom directory for logging.')
-
+    
+    
     _args, _unparsed_args = parser.parse_known_args()
     return _args, _unparsed_args
 
@@ -143,11 +147,16 @@ def run_training(args, unparsed_args, exp_name=None):
     )
     model.compile(num_cores=args.cores, exp_name=exp_name)
 
+    if args.ckpt is not None:
+        model.actor_critic, _ = utils.load_actor_critic_and_env_from_disk(
+            args.ckpt, None)
+
     model.fit()
+
     model.eval()
+
     if args.play:
         model.play()
-
 
 if __name__ == '__main__':
     args, unparsed_args = get_training_command_line_args()

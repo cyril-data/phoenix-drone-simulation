@@ -31,8 +31,8 @@ if __name__ == '__main__':
 
     time_step = 0.01
     N = 50
-    obs_0 = bullet_env.reset()
-    obs_1 = simle_env.reset()
+    obs_0, info = bullet_env.reset()
+    obs_1, info  = simle_env.reset()
     xs = np.zeros((N, 2))
     ys = np.zeros((N, 2))
     zs = np.zeros((N, 2))

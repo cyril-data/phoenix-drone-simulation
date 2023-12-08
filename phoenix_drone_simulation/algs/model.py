@@ -10,6 +10,8 @@ from typing import Optional
 
 from phoenix_drone_simulation.utils.loggers import setup_logger_kwargs
 from phoenix_drone_simulation.utils import utils
+import gymnasium as gym
+import time
 
 
 class Model(object):
@@ -87,7 +89,7 @@ class Model(object):
 
     def _eval_once(self, actor_critic, env, render) -> tuple:
         done = False
-        x = self.env.reset()
+        x, info = self.env.reset()
         ret = 0.
         costs = 0.
         episode_length = 0
@@ -98,6 +100,8 @@ class Model(object):
             costs += info.get('cost', 0)
             ret += r
             episode_length += 1
+            done = terminated or truncated
+
         return ret, episode_length, costs
 
     def eval(self, **kwargs) -> None:
@@ -131,6 +135,8 @@ class Model(object):
 
         # fit() can also take a custom env, e.g. a virtual environment
         env_id = self.env_id if env is None else env
+        
+        self.kwargs["init_with_weight"] = self.actor_critic
 
         learn_func = utils.get_learn_function(self.alg)
         ac, env = learn_func(
@@ -143,10 +149,30 @@ class Model(object):
         self.env = env
         self.trained = True
 
-    def play(self) -> None:
+    def play(self, episodes=5) -> None:
         """ Visualize model after training."""
         assert self.trained, 'Call model.fit() before model.play()'
-        self.eval(episodes=5, render=True)
+
+        env = gym.make(self.env_id, render_mode="human")
+        episode_length = 0
+
+        while episode_length < episodes:
+            obs, info = env.reset()
+            done = False
+            while not done:
+                obs = torch.as_tensor(obs, dtype=torch.float32)
+                action, value, *_ = self.actor_critic(obs)
+                obs, reward, terminated, truncated, info = env.step(action)
+                done = terminated or truncated
+                time.sleep(1/60)
+                if done:
+                    obs, info = env.reset()
+
+            episode_length += 1
+
+
+
+        # self.eval(episodes=5, render=True)
 
     def summary(self):
         """ print nice outputs to console."""
