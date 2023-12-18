@@ -198,12 +198,16 @@ class SoftActorCriticAlgorithm(core.OffPolicyGradientAlgorithm):
         seed += 10000 * mpi.proc_id()
         torch.manual_seed(seed)
         np.random.seed(seed)
-        self.env.seed(seed=seed)
+        # self.env.seed(seed=seed)
 
         # Create actor-critic module and target networks
         self.ac = MLPActorCritic(
             self.env.observation_space, self.env.action_space, ac_kwargs)
         self.ac_targ = deepcopy(self.ac)
+
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.ac.to(device)
+        self.ac_targ.to(device)
 
         # Freeze target networks with respect to optimizers
         # (only update via polyak averaging)
@@ -393,7 +397,7 @@ class SoftActorCriticAlgorithm(core.OffPolicyGradientAlgorithm):
     def roll_out(self):
         r"""Rollout >>one<< episode and store to buffer."""
 
-        o, info, ep_ret, ep_len = self.env.reset(), 0., 0
+        (o, info), ep_ret, ep_len = self.env.reset(), 0., 0
         local_start_steps = int(self.start_steps / mpi.num_procs())
 
         for t in range(self.local_batch_size):
@@ -410,13 +414,13 @@ class SoftActorCriticAlgorithm(core.OffPolicyGradientAlgorithm):
             ep_ret += r
             ep_len += 1
 
-            # Ignore the "done" signal if it comes from hitting the time
+            # Ignore the "done" or "terminated" signal if it comes from hitting the time
             # horizon (that is, when it's an artificial terminal signal
             # that isn't based on the agent's state)
-            terminal = False if ep_len == self.max_ep_len else done
+            terminated = False if ep_len == self.max_ep_len else terminated
 
             # Store experience to replay buffer
-            self.buffer.store(o, a, r, next_o, terminal)
+            self.buffer.store(o, a, r, next_o, terminated)
 
             # Update handling
             if not self.in_warm_up and t % self.update_every == 0:
@@ -426,10 +430,10 @@ class SoftActorCriticAlgorithm(core.OffPolicyGradientAlgorithm):
 
             o = next_o
             timeout = (ep_len == self.max_ep_len)
-            if timeout or done:
+            if timeout or terminated:
                  # only save EpRet / EpLen if trajectory finished
                 self.logger.store(EpRet=ep_ret, EpLen=ep_len)
-                o, info, ep_ret, ep_len = self.env.reset(), 0., 0
+                (o, info), ep_ret, ep_len = self.env.reset(), 0., 0
         if self.in_warm_up:
             # add zero values to prevent logging errors during warm-up
             self.logger.store(Q1Vals=0, Q2Vals=0, LossQ=0, LossPi=0, LogPi=0)

@@ -14,6 +14,9 @@ import getpass
 import torch
 from typing import Optional, Tuple
 
+import sys
+sys.path.append("..")
+sys.path.append(".")
 
 # local imports
 import phoenix_drone_simulation  # import environments
