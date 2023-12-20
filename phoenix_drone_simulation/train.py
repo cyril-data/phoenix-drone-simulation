@@ -113,6 +113,7 @@ def run_training(args, unparsed_args, exp_name=None):
     # Use number of physical cores as default. If also hardware threading CPUs
     # should be used, enable this by the use_number_of_threads=True
     use_number_of_threads = True if args.cores > physical_cores else False
+
     if mpi_fork(args.cores, use_number_of_threads=use_number_of_threads):
         # Re-launches the current script with workers linked by MPI
         sys.exit()

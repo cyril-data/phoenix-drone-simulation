@@ -205,9 +205,9 @@ class SoftActorCriticAlgorithm(core.OffPolicyGradientAlgorithm):
             self.env.observation_space, self.env.action_space, ac_kwargs)
         self.ac_targ = deepcopy(self.ac)
 
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.ac.to(device)
-        self.ac_targ.to(device)
+        # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        # self.ac.to(device)
+        # self.ac_targ.to(device)
 
         # Freeze target networks with respect to optimizers
         # (only update via polyak averaging)
