@@ -157,7 +157,6 @@ def run_training(args, unparsed_args, exp_name=None):
     if args.ckpt is not None:
         model.actor_critic, _ = utils.load_actor_critic_and_env_from_disk(
             args.ckpt, None)
-
     model.fit()
 
     model.eval()
