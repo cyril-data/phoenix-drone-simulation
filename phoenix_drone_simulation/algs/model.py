@@ -136,7 +136,7 @@ class Model(object):
         # fit() can also take a custom env, e.g. a virtual environment
         env_id = self.env_id if env is None else env
         
-        self.kwargs["init_with_weight"] = self.actor_critic
+        self.kwargs["ac"] = self.actor_critic
 
         learn_func = utils.get_learn_function(self.alg)
         ac, env = learn_func(

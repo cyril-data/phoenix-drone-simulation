@@ -61,7 +61,7 @@ class IWPGAlgorithm(core.OnPolicyGradientAlgorithm):
             save_freq: int = 10,
             seed: int = 0,
             video_freq: int = -1,  # set to positive integer for video recording
-            # ac: core.ActorCritic = None
+            ac: core.ActorCritic = None,
             **kwargs  # use to log parameters from child classes
     ):
 
@@ -127,16 +127,20 @@ class IWPGAlgorithm(core.OnPolicyGradientAlgorithm):
         np.random.seed(seed)
         self.env.reset(seed=seed)
 
-        self.ac = core.ActorCritic(
-            actor_type=actor,
-            observation_space=self.env.observation_space,
-            action_space=self.env.action_space,
-            use_standardized_obs=use_standardized_obs,
-            use_scaled_rewards=use_reward_scaling,
-            use_shared_weights=use_shared_weights,
-            weight_initialization=weight_initialization,
-            ac_kwargs=ac_kwargs
-        )
+        if ac is None:
+            self.ac = core.ActorCritic(
+                actor_type=actor,
+                observation_space=self.env.observation_space,
+                action_space=self.env.action_space,
+                use_standardized_obs=use_standardized_obs,
+                use_scaled_rewards=use_reward_scaling,
+                use_shared_weights=use_shared_weights,
+                weight_initialization=weight_initialization,
+                ac_kwargs=ac_kwargs
+            )
+        else:
+            self.ac = ac
+
         # === set up MPI specifics
         self._init_mpi()
 
@@ -256,9 +260,15 @@ class IWPGAlgorithm(core.OnPolicyGradientAlgorithm):
         return ((self.ac.v(obs) - ret) ** 2).mean()
 
     def learn(self, init_with_weight=None) -> tuple:
-        if init_with_weight is not None : 
+        if init_with_weight is not None:
             self.ac = init_with_weight
-
+            print("init_with_weight", init_with_weight)
+            print("*"*80)
+            print("*"*80)
+            print("*"*80)
+            print("*"*80)
+            print("*"*80)
+            print("*"*80)
         # Main loop: collect experience in env and update/log each epoch
         for self.epoch in range(self.epochs):
             self.learn_one_epoch()

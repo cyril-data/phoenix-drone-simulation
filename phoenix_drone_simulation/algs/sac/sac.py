@@ -145,7 +145,8 @@ class SoftActorCriticAlgorithm(core.OffPolicyGradientAlgorithm):
             seed=0,
             start_steps=10000,
             update_after=1000,
-            update_every=50,
+            update_every=50,            
+            ac: core.ActorCritic = None,
             **kwargs  # use to log parameters from child classes
     ):
         assert 0 < polyak < 1
@@ -201,8 +202,13 @@ class SoftActorCriticAlgorithm(core.OffPolicyGradientAlgorithm):
         # self.env.seed(seed=seed)
 
         # Create actor-critic module and target networks
-        self.ac = MLPActorCritic(
-            self.env.observation_space, self.env.action_space, ac_kwargs)
+
+        if ac is None:
+            self.ac = MLPActorCritic(
+                self.env.observation_space, self.env.action_space, ac_kwargs)
+        else:
+            self.ac = ac
+
         self.ac_targ = deepcopy(self.ac)
 
         # device = 'cuda' if torch.cuda.is_available() else 'cpu'
